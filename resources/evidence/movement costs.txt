@@ -1,0 +1,8 @@
+c^2 	= a^2 + b^2
+	= 32^2 + 32^2
+c	= sqrt(2048)
+	= ~45.25483399593904
+	= ~45
+
+Vertical/Horizontal cost 	= 32
+Diagonal cost 			= 45

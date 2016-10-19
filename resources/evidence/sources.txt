@@ -1,0 +1,59 @@
+http://commons.apache.org/proper/commons-collections/apidocs/org/apache/commons/collections4/BidiMap.html
+
+http://stackoverflow.com/questions/1383797/java-hashmap-how-to-get-key-from-value
+
+http://www.java2s.com/Code/JavaImages/FontList.PNG
+
+Sebastian Lague (2014) A* Pathfinding (E01: Algorithm explanation).
+Available at: https://www.youtube.com/watch?v=-L-WgKMFuhE (Accessed: 20 September 2016)
+
+Lester, P. (2005) A* Pathfinding for beginners.
+Available at: http://www.policyalmanac.org/games/aStarTutorial.htm (Accessed: 21 September 2016).
+
+Bitmap.java
+ * https://searchcode.com/codesearch/raw/84437562/
+ * https://searchcode.com/file/84437562/src/me/deathjockey/tod/screen/Bitmap.java
+ 
+ http://stackoverflow.com/questions/4988778/what-is-the-difference-between-mousepressed-and-mousedragged-in-my-program
+ 
+ http://stackoverflow.com/questions/5801734/how-to-draw-lines-in-java
+
+https://docs.oracle.com/javase/tutorial/uiswing/events/treeselectionlistener.html
+
+https://docs.oracle.com/javase/8/docs/api/javax/swing/event/TreeSelectionListener.html#valueChanged-javax.swing.event.TreeSelectionEvent-
+
+https://docs.oracle.com/javase/tutorial/displayCode.html?code=https://docs.oracle.com/javase/tutorial/uiswing/examples/components/TreeDemoProject/src/components/TreeDemo.java
+
+https://docs.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html
+
+http://stackoverflow.com/questions/9332955/how-to-get-the-operating-systems-look-feel-in-java-7
+
+https://docs.oracle.com/javase/7/docs/api/javax/swing/UIManager.html
+
+http://docs.oracle.com/javase/tutorial/uiswing/components/dialog.html
+
+http://stackoverflow.com/questions/2394388/java-how-to-convert-a-color-tostring-into-a-color
+
+http://theory.stanford.edu/~amitp/GameProgramming/Heuristics.html -> https://github.com/ariejan/slick2d/tree/master/src/org/newdawn/slick/util/pathfinding
+
+http://www.codebytes.in/2015/02/a-shortest-path-finding-algorithm.html
+
+-------------------------
+
+https://commons.apache.org/proper/commons-lang/
+
+https://dev.mysql.com/doc/connector-j/5.1/en/connector-j-reference-configuration-properties.html
+
+https://db4free.net
+
+[50] -> http://stackoverflow.com/questions/10437367/why-save-data-files-in-hexadecimal-binary-instead-of-just-plain-text
+
+http://stackoverflow.com/questions/412380/combine-paths-in-java
+
+https://www.youtube.com/watch?v=Kw8AMmyc6vg
+
+https://www.youtube.com/watch?v=052U-bWEXrk
+
+http://www.java2s.com/Tutorial/Java/0240__Swing/UseaColorChooser.htm
+
+http://dev.mysql.com/doc/refman/5.7/en/char.html

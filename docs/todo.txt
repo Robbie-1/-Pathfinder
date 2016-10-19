@@ -1,0 +1,6 @@
+- fix dragging static tiles
+- add scrolling to OptionsManager JFrame (use a JScrollPane maybe?)
+- finish working on WritingToFile/ReadingFromFile (see: WritingToFileWorkspace project)
+- do mySQL stuff for database saving
+- finish preferences/settings stuff -> writing settings to file/database and reading from file/database
+- create/add custom interfaces for all options in OptionsManager (e.g. colour picker has been done for picking colours)

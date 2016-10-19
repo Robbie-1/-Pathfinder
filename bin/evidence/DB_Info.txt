@@ -1,0 +1,7 @@
+MySQL Database name: pathfinder_db
+MySQL username: pathfinder_user
+MYSQL password: reigatecollege
+
+Registered email adress: rm13030@reigate.ac.uk
+
+<db4free.net>

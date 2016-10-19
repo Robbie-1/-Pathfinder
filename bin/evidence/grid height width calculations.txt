@@ -1,0 +1,8 @@
+672x480
+
+-> (672, 489)
+	-> (672, 485)
+		-> (672, 480)
+
+-> x changes fine
+-> find a way for the grid component co-ordinates on the jframe to change when height is modified, as WELL as when the width is modified (width already changes grid co-ordinates)

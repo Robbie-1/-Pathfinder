@@ -1,0 +1,24 @@
+21-09-2016:
+-> Rendering via BufferStrategy w/ 60 Tick cap implemented
+
+28-09-2016:
+-> Fixed grid offsets
+-> Added Placeable Start/End/Obstruction tiles (see gif_1 in the "resources" folder)
+-> static (Start/End) tiles can no-longer be highlighted, nor drawn-over when they have been placed.
+	~ Instead, drag to reposition if necessary.
+-> static tiles are now shown in different colours (Start=Green tile, End=Red tile, Obstructions=Grey tile)
+
+30-09-2016:
+-> Added new Options menu (View -> Options)
+	-> Values can be easily found by navigating the JTree that pops up, and can be edited.
+-> Dragging a static tile now draws a line from your starting point to where your mouse is currently located (can be un-snapped to tile by toggle)
+-> Added a debug option to view current mouse co-ordinates (Hold down CTRL)
+
+
+12-10-2016:
+-> Colours are now stored as hex values, rather than "Color()" objects, for efficiency.
+-> Colour values can now be picked visually, rather than having to enter the Hex values manually.
+-> Updated debugger to include the current FPS (Frames-per-second)
+-> File-writing and File-reading system development in-progress
+	-> I set-up a MySQL Database @ db4free.net (See: DB_Info.txt @ "/evidence/")
+	-> Researched/Looked into the advantages and disadvantages of saving in Binary over Plaintext, and serializable class objects.

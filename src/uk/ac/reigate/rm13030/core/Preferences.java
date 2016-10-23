@@ -8,17 +8,27 @@ import javax.swing.UIManager;
 import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
+/**
+ * 
+ * @author Robbie <http://reigate.ac.uk/>
+ *
+ */
+
 public class Preferences implements Serializable {
 
 	private static final long serialVersionUID = 6776357359705414395L;
     
-    private static BidiMap<String, Object> themeMap = new DualHashBidiMap<String, Object>();//String = name of variable (present this on JTree), Object = value of variable
-    private static BidiMap<String, Object> colourMap = new DualHashBidiMap<String, Object>();
-    private static BidiMap<String, Object> draggingMap = new DualHashBidiMap<String, Object>();
+    private BidiMap<String, Object> themeMap;//String = name of variable (present this on JTree), Object = value of variable
+    private BidiMap<String, Object> colourMap;
+    private BidiMap<String, Object> draggingMap;
 
-    public Preferences() {setDefaults();}
+    public Preferences() { 
+    	this.themeMap = new DualHashBidiMap<String, Object>();
+    	this.colourMap = new DualHashBidiMap<String, Object>();
+    	this.draggingMap = new DualHashBidiMap<String, Object>();
+    }
 
-    private void setDefaults() {
+    public void setDefaults() {
         /*UITheme = UIManager.getLookAndFeel();
 
         highlightColour = String.BLUE;
@@ -28,7 +38,8 @@ public class Preferences implements Serializable {
 
         snapToTile = true;*/
         
-        themeMap.put("Set theme", UIManager.getLookAndFeel());
+    	
+        //themeMap.put("Set theme", UIManager.getLookAndFeel());	//Temporarily disabled ~
         
         colourMap.put("Highlight colour", "#0000FF");
         colourMap.put("Start node colour", "#00FF00");
@@ -74,7 +85,7 @@ public class Preferences implements Serializable {
         //return obstructionColour;
     }
 
-    public boolean isSnapToTile() {
+    public Boolean isSnapToTile() {
     	return (Boolean) draggingMap.get("Snap to Tile");
         //return snapToTile;
     }

@@ -6,6 +6,15 @@ import java.awt.event.MouseMotionListener;
 
 import javax.swing.JLabel;
 
+import uk.ac.reigate.rm13030.utils.SimpleLogger;
+import uk.ac.reigate.rm13030.utils.SimpleLogger.MessageType;
+
+/**
+ * 
+ * @author Robbie <http://reigate.ac.uk/>
+ *
+ */
+
 public class Grid extends JLabel implements MouseListener, MouseMotionListener {
 
 
@@ -20,7 +29,8 @@ public class Grid extends JLabel implements MouseListener, MouseMotionListener {
 
     public void render(MainScreen screen) {
         if (grid == null) {
-            System.out.println("Please initialise the Grid bitmap before attempting to render it!");
+            //System.out.println("Please initialise the Grid bitmap before attempting to render it!");
+        	SimpleLogger.log(Grid.class, MessageType.ERROR, "Please initialise the Grid bitmap before attempting to render it!");
             return;
         }
         screen.render(grid, 0, 0);
@@ -40,12 +50,13 @@ public class Grid extends JLabel implements MouseListener, MouseMotionListener {
     @Override
     public void mouseClicked(MouseEvent e) {
         // TODO Auto-generated method stub
-
+    	
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
         // TODO Auto-generated method stub
+    	System.out.println(",mouse entered");
     }
 
     @Override

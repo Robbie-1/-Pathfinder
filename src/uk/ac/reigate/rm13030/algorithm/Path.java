@@ -2,6 +2,10 @@ package uk.ac.reigate.rm13030.algorithm;
 
 import java.util.ArrayList;
 
+/**
+ * @author Robbie <http://reigate.ac.uk/>
+ */
+
 public class Path {
 	
 	ArrayList<Step> steps;

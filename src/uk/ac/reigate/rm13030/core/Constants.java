@@ -3,6 +3,10 @@ package uk.ac.reigate.rm13030.core;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * @author Robbie <http://reigate.ac.uk/>
+ */
+
 public class Constants {
 	
     public static final String NAME = "<Pathfinder>";
@@ -18,7 +22,13 @@ public class Constants {
 					Paths.get("X:\\My Documents\\.pathfinder") : 
 						Paths.get(System.getProperty("user.home")+"\\.pathfinder");
 	
-	public static final Path FILE_PATH = DIR_PATH.resolve(Constants.DIR_PATH+"\\data_store.ser");
+	//public static final Path FILE_PATH = DIR_PATH.resolve(Constants.DIR_PATH+"\\data_store.ser");
+        
+        public static final Path PREFERENCES_PATH = DIR_PATH.resolve(Constants.DIR_PATH+"\\preferences.ser");
+        
+        public static final Path TILE_MAP_PATH = DIR_PATH.resolve(Constants.DIR_PATH+"\\tileMap.ser");
+        
+        public static final Path STATIC_TILES_PATH = DIR_PATH.resolve(Constants.DIR_PATH+"\\staticTiles.ser");
 	
 	//public static final Path LOCAL_PATH =  Paths.get("C:\\Users\\rm13030\\file.ser");
 	//public static final String LOCAL_PATH = System.getProperty("user.home");

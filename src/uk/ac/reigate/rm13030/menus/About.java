@@ -22,6 +22,12 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.ImageIcon;
 import javax.swing.JEditorPane;
 
+/**
+ * 
+ * @author Robbie <http://reigate.ac.uk/>
+ *
+ */
+
 public class About extends JFrame {
 
     private JPanel contentPane;
@@ -70,8 +76,7 @@ public class About extends JFrame {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try {
-                        Desktop.getDesktop().browse(new URI("http://www.reigate.ac.uk"));
-                    }
+                	Desktop.getDesktop().browse(new URI("http://www.reigate.ac.uk"));
                 } catch (URISyntaxException | IOException ex) {
                     //It looks like there's a problem
                 }

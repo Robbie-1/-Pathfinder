@@ -16,7 +16,7 @@
 
 
 12-10-2016:
--> Colours are now stored as hex values, rather than "Color()" objects
+-> Colours are now stored as hex values, rather than "Color()" objects, for efficiency.
 -> Colour values can now be picked visually, rather than having to enter the Hex values manually.
 -> Updated debugger to include the current FPS (Frames-per-second)
 -> File-writing and File-reading system development in-progress

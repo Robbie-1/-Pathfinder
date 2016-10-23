@@ -10,8 +10,12 @@ import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import uk.ac.reigate.rm13030.core.Application;
+import uk.ac.reigate.rm13030.utils.SimpleLogger;
+import uk.ac.reigate.rm13030.utils.SimpleLogger.MessageType;
+
 /**
- * @author Robbie McLeod <Reigate College>
+ * @author Robbie <http://reigate.ac.uk/>
  */
 public class Database {
 	
@@ -45,7 +49,7 @@ public class Database {
         connectionProperties.put("user", username);
         connectionProperties.put("password", password);
         
-        System.out.println("["+getCurrentTime()+"]"+ " Attempting to connect to database...");
+        SimpleLogger.log(Database.class, MessageType.INFO, "Attempting to connect to database...");
         
         /**
          * Connect to the server
@@ -61,7 +65,7 @@ public class Database {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} finally {
-		        System.out.println("["+getCurrentTime()+"]"+ " Connected to database!");
+				SimpleLogger.log(Database.class, MessageType.INFO, "Connected to database!");
 			}
         }
         
@@ -100,10 +104,6 @@ public class Database {
 		    }
 		}
         
-	}
-	
-	private Time getCurrentTime() {
-		return Time.valueOf(LocalTime.now());
 	}
 
 }

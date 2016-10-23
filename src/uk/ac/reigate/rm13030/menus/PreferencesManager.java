@@ -2,6 +2,7 @@ package uk.ac.reigate.rm13030.menus;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.util.ArrayList;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -18,7 +19,10 @@ import org.apache.commons.collections4.BidiMap;
 import org.apache.commons.collections4.bidimap.DualHashBidiMap;
 
 import uk.ac.reigate.rm13030.core.Application;
+import uk.ac.reigate.rm13030.core.Constants;
 import uk.ac.reigate.rm13030.core.Preferences;
+import uk.ac.reigate.rm13030.utils.SimpleLogger;
+import uk.ac.reigate.rm13030.utils.SimpleLogger.MessageType;
 import uk.ac.reigate.rm13030.utils.Utils;
 
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -28,6 +32,25 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.LookAndFeel;
+import uk.ac.reigate.rm13030.storage.LocalStorage;
+import javax.swing.JTabbedPane;
+import javax.swing.JButton;
+import javax.swing.border.TitledBorder;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.CardLayout;
+import javax.swing.border.LineBorder;
+
+/**
+ * 
+ * @author Robbie <http://reigate.ac.uk/>
+ *
+ */
 
 public class PreferencesManager extends JFrame {
 	
@@ -35,6 +58,7 @@ public class PreferencesManager extends JFrame {
 	
 	private Preferences prefs;
 	private JPanel contentPane;
+        private LocalStorage localStorage;
 
 	/**
 	 * Launch the application.
@@ -56,16 +80,32 @@ public class PreferencesManager extends JFrame {
 	 * Create the frame.
 	 */
 	public PreferencesManager() {
-		this.prefs = Application.getPreferences();
+		prefs = Application.getPreferences();
 		setTitle("Preferences");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 256, 299);
+		setBounds(100, 100, 248, 365);
 		
 	    setLocationRelativeTo(null);
 		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
+		
+		JPanel panel = new JPanel();
+		panel.setBorder(new LineBorder(Color.LIGHT_GRAY));
+		GroupLayout gl_contentPane = new GroupLayout(contentPane);
+		gl_contentPane.setHorizontalGroup(
+			gl_contentPane.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_contentPane.createSequentialGroup()
+					.addComponent(panel, GroupLayout.PREFERRED_SIZE, 221, Short.MAX_VALUE)
+					.addContainerGap())
+		);
+		gl_contentPane.setVerticalGroup(
+			gl_contentPane.createParallelGroup(Alignment.TRAILING)
+				.addComponent(panel, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
+		);
+		
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		
 		JTree tree = new JTree();
 		tree.addTreeSelectionListener(new TreeSelectionListener() {
@@ -90,8 +130,11 @@ public class PreferencesManager extends JFrame {
 		        		//launch colour picker menu.
 		        		Color c = Utils.hexToColor((String) prefs.getColourMap().get(nodeInfo)); //set current colour to current colour
 		        	    c = JColorChooser.showDialog(null, "Choose: "+selectedNodeKey, c); //store selected colour
-		        	    if (c != null)
+		        	    if (c != null) {
 		        	    	prefs.getColourMap().put(nodeInfo, Utils.colorToHex(c)); //store updated colour for node
+			        		LocalStorage local = new LocalStorage();
+			        		local.storePreferences(prefs);
+		        	    }
 		        	    return;
 		        	}
 		        	
@@ -100,11 +143,13 @@ public class PreferencesManager extends JFrame {
 		        	if (response != null)
 		        		getMapType(nodeInfo).put(nodeInfo, getFormatted(nodeInfo, response));
 		        	
+		        	
 		        	//Boolean bool = Boolean.parseBoolean(response);
 		        	
 		        	//getMapType(nodeInfo).put(nodeInfo, bool);
 		        	
-		        	System.out.println("New value = "+getMapType(nodeInfo).get(nodeInfo));
+		        	//System.out.println("New value = "+getMapType(nodeInfo).get(nodeInfo));
+		        	SimpleLogger.log(PreferencesManager.class, MessageType.INFO, "New value = "+getMapType(nodeInfo).get(nodeInfo));
 		        	return;
 		        }
 			}
@@ -132,15 +177,44 @@ public class PreferencesManager extends JFrame {
 				}
 			}
 		));
-		GroupLayout gl_contentPane = new GroupLayout(contentPane);
-		gl_contentPane.setHorizontalGroup(
-			gl_contentPane.createParallelGroup(Alignment.LEADING)
-				.addComponent(tree, GroupLayout.DEFAULT_SIZE, 230, Short.MAX_VALUE)
+		tabbedPane.addTab(Constants.NAME, null, tree, null);
+		
+		JButton btnNewButton = new JButton("Reset preferences");
+		btnNewButton.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					prefs.setDefaults();
+				} catch (Exception exc) {
+					exc.printStackTrace();
+				} finally {
+					JOptionPane.showMessageDialog(null, "Reset preferences successfully!");
+				}
+			}
+			
+		});
+		btnNewButton.setToolTipText("Resets preferences to their default values");
+		GroupLayout gl_panel = new GroupLayout(panel);
+		gl_panel.setHorizontalGroup(
+			gl_panel.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel.createSequentialGroup()
+					.addContainerGap()
+					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+						.addComponent(tabbedPane, Alignment.TRAILING, GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE)
+						.addComponent(btnNewButton, GroupLayout.DEFAULT_SIZE, 199, Short.MAX_VALUE))
+					.addContainerGap())
 		);
-		gl_contentPane.setVerticalGroup(
-			gl_contentPane.createParallelGroup(Alignment.TRAILING)
-				.addComponent(tree, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 250, Short.MAX_VALUE)
+		gl_panel.setVerticalGroup(
+			gl_panel.createParallelGroup(Alignment.TRAILING)
+				.addGroup(gl_panel.createSequentialGroup()
+					.addGap(4)
+					.addComponent(tabbedPane, GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
+					.addPreferredGap(ComponentPlacement.UNRELATED)
+					.addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 35, GroupLayout.PREFERRED_SIZE)
+					.addGap(6))
 		);
+		panel.setLayout(gl_panel);
 		//contentPane.add(new JScrollPane(tree), Alignment.LEADING);
 		contentPane.setLayout(gl_contentPane);
 	}
@@ -193,5 +267,4 @@ public class PreferencesManager extends JFrame {
 	public void setPreferences(Preferences prefs) {
 		this.prefs = prefs;
 	}
-	
 }

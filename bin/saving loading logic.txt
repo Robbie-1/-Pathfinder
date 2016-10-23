@@ -1,0 +1,30 @@
+Saving to file:
+=> Save locally:
+    3 files:
+    - Tile Map (tileMap.ser)
+    - Static Tiles (staticTiles.ser)
+    - Preferences (prefs.ser)
+
+    -> If any preference is modified/changed: re-save preference file.
+
+    All objects are serialized before they are written to file,
+    => SerializationUtils.serialize()
+
+    => Usage of SerializationUtils class from the Apache Commons Lang library (import org.apache.commons.lang3.SerializationUtils)
+    
+    
+
+=> Save on Database:
+
+
+Reading from file:
+=> Reading locally:
+    - When program launches initially, load the preferences file
+    - On the Splash screen:
+        - if the "Create New" button is selected -> do not load from file
+        - if the "Load" button is selected -> Load tileMap, staticTiles from file.
+    
+=> Reading from Database:
+    - Initialise connection to Database
+    - Run SQL query to retrieve correct data
+    

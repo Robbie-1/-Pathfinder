@@ -2,6 +2,10 @@ package uk.ac.reigate.rm13030.algorithm;
 
 import uk.ac.reigate.rm13030.core.Tile;
 
+/**
+ * @author Robbie <http://reigate.ac.uk/>
+ */
+
 public class Step {
 	
 	private Tile oldTile, newTile;

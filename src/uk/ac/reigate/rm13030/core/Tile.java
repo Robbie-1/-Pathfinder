@@ -1,7 +1,6 @@
 package uk.ac.reigate.rm13030.core;
 
 import java.awt.AlphaComposite;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -9,9 +8,17 @@ import java.awt.Point;
 import java.io.Serializable;
 import java.util.UUID;
 
-import uk.ac.reigate.rm13030.menus.MainScreen;
 import uk.ac.reigate.rm13030.menus.PreferencesManager;
+import uk.ac.reigate.rm13030.utils.SimpleLogger;
 import uk.ac.reigate.rm13030.utils.Utils;
+import uk.ac.reigate.rm13030.visual.MainScreen;
+import uk.ac.reigate.rm13030.utils.SimpleLogger.MessageType;
+
+/**
+ * 
+ * @author Robbie <http://reigate.ac.uk/>
+ *
+ */
 
 public class Tile implements Serializable {
 
@@ -217,7 +224,8 @@ public class Tile implements Serializable {
 
     public Tile[][] getTileMap() {
     	if (tileMap.length == 0) {
-    		System.out.println("tileMap length == 0: mapping values before returning!");
+    		//System.out.println("tileMap length == 0: mapping values before returning!");
+    		SimpleLogger.log(Tile.class, MessageType.INFO, "tileMap length = 0", "mapping values before returning!");
     		mapValues();
     	}
         return tileMap;

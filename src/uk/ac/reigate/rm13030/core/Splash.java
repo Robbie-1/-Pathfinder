@@ -22,9 +22,18 @@ import javax.swing.JTextPane;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
+/**
+ * 
+ * @author Robbie <http://reigate.ac.uk/>
+ *
+ */
+
 public class Splash extends JFrame {
 
-    private JPanel contentPane;
+	private static final long serialVersionUID = -5862160684399610827L;
+	
+	private JPanel contentPane;
+    private boolean selectedCreateNew;
 
     /**
      * Launch the application.
@@ -65,8 +74,7 @@ public class Splash extends JFrame {
         JButton btnStart = new JButton("Create New");
         btnStart.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent arg0) {
-                Application.main(null);
-                Application.createNew = true;
+                Application.main("true"); //Create new selected
                 dispose();
             }
         });
@@ -74,8 +82,7 @@ public class Splash extends JFrame {
         JButton btnLoad = new JButton("Load");
         btnLoad.addActionListener(new ActionListener() {
         	public void actionPerformed(ActionEvent e) {
-        		Application.main(null);
-                Application.createNew = false;
+        		Application.main("false"); //Load selected
         		dispose();
         	}
         });
@@ -106,4 +113,5 @@ public class Splash extends JFrame {
         );
         contentPane.setLayout(gl_contentPane);
     }
+	
 }

@@ -2,12 +2,15 @@ package uk.ac.reigate.rm13030.utils;
 
 import java.awt.Color;
 import java.awt.Point;
+import java.sql.Time;
+import java.time.LocalTime;
 
 import uk.ac.reigate.rm13030.core.Constants;
 
 /**
- * Utils ~ A selection of useful functions
- * @author Robbie
+ * Utils.java; A selection of useful functions
+ * 
+ * @author Robbie <http://reigate.ac.uk/>
  */
 
 public class Utils {
@@ -27,5 +30,9 @@ public class Utils {
         }
         return false;
     }
+    
+	public static Time getCurrentTime() {
+		return Time.valueOf(LocalTime.now());
+	}
 
 }

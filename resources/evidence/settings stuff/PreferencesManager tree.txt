@@ -1,0 +1,11 @@
+Visual
+	Theme
+		Set theme
+	Tile
+		Colour
+			Highlight colour
+			Start node colour
+			End node colour
+			Obstruction colour
+		Snapping
+			Snap to Tile

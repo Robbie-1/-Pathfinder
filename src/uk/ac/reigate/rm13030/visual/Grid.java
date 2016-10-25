@@ -56,7 +56,6 @@ public class Grid extends JLabel implements MouseListener, MouseMotionListener {
     @Override
     public void mouseEntered(MouseEvent e) {
         // TODO Auto-generated method stub
-    	System.out.println(",mouse entered");
     }
 
     @Override

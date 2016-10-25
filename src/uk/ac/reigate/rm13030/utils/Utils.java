@@ -24,11 +24,19 @@ public class Utils {
 	}
 	
     public static boolean isOutOfBounds(Point pt) {
-        if (pt == null || pt.getX() < 0 || pt.getX() > Constants.WIDTH || pt.getY() < 0 || pt.getY() > 447) {
+    	if (pt == null)
+    		return true;
+    	
+    	if (Constants.GRID_RECT.contains(pt)) {
+    		return false;
+    	}
+    	
+    	return true;
+        //if (pt == null || pt.getX() < 0 || pt.getX() > Constants.WIDTH || pt.getY() < 0 || pt.getY() > 447) {
             //grid bounds = 608x448
-        	return true;
-        }
-        return false;
+        //	return true;
+        //}
+       // return false;
     }
     
 	public static Time getCurrentTime() {

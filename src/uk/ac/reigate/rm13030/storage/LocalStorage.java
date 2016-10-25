@@ -43,7 +43,7 @@ public class LocalStorage {
         //System.out.println("Written tile map to file!");
     }
     
-    public void storeStaticTiles(BidiMap<Tile, Tile.TileType> staticTiles) {
+    public void storeStaticTiles(ArrayList<Tile> staticTiles) {
         writeObject(staticTiles, Constants.STATIC_TILES_PATH);
         //System.out.println("Written static tiles to file!");
     }
@@ -85,14 +85,14 @@ public class LocalStorage {
     	}
     }
     
-    public BidiMap<Tile, Tile.TileType> readStaticTiles() {
+    public ArrayList<Tile> readStaticTiles() {
     	
     	byte[] read = readBytes(Constants.STATIC_TILES_PATH);
     	
     	if (read == null) {
     		return null;
     	} else {
-    		return (BidiMap<Tile, Tile.TileType>) SerializationUtils.deserialize(read);
+    		return (ArrayList<Tile>) SerializationUtils.deserialize(read);
     	}
     			
     }

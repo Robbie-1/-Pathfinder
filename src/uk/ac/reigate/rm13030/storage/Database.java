@@ -19,7 +19,7 @@ import uk.ac.reigate.rm13030.utils.SimpleLogger.MessageType;
  */
 public class Database {
 	
-	private Properties connectionProperties;
+	private static Properties connectionProperties;
 	
 	public static void main(String args[]) {
 		new Database();
@@ -29,7 +29,7 @@ public class Database {
 		getConnection();
 	}
 	
-	public Connection getConnection() {
+	public static Connection getConnection() {
 		
 		/**
 		 * MySQL Server Settings
@@ -51,6 +51,7 @@ public class Database {
         
         SimpleLogger.log(Database.class, MessageType.INFO, "Attempting to connect to database...");
         
+        SQLException except = null;
         /**
          * Connect to the server
          */
@@ -61,11 +62,14 @@ public class Database {
 				        + serverName
 				        + ":" + portNumber +"?useSSL="+useSSL,
 				        connectionProperties);
-			} catch (SQLException e) {
+			} catch (SQLException exception) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
+				//e.printStackTrace();
+				except = exception;
+				SimpleLogger.log(Database.class, MessageType.ERROR, "Error connecting to database...");
 			} finally {
-				SimpleLogger.log(Database.class, MessageType.INFO, "Connected to database!");
+				if (except == null)
+					SimpleLogger.log(Database.class, MessageType.INFO, "Connected to database!");
 			}
         }
         

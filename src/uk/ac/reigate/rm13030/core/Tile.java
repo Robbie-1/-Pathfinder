@@ -32,8 +32,6 @@ public class Tile implements Serializable {
     private int searchDepth;
     private int gCost, hCost, fCost;
     
-    private Tile[][] tileMap;
-    
     public Tile(Point pt) {
     	this(UUID.randomUUID(), pt, TileType.OPEN, "#FF0000", null, 0, 0, 0);
     }
@@ -67,7 +65,7 @@ public class Tile implements Serializable {
     	return true;
     }
 
-    public void render(MainScreen screen, Point mouseLoc, boolean isStatic) {
+    public static void render(MainScreen screen, Point mouseLoc, boolean isStatic) {
         Tile currentTile = null;
         //Tile lastTile = null;
         /**
@@ -87,7 +85,10 @@ public class Tile implements Serializable {
         }
 
         if (isStatic) {
-            currentTile = snapToTile(mouseLoc);
+            currentTile = Application.snapToTile(mouseLoc);
+            
+            if (currentTile == null)
+            	return;
             //if (Application.getStaticTiles().contains(currentTile)) {
             //	System.out.println("not repainting");
             //	return;
@@ -101,9 +102,6 @@ public class Tile implements Serializable {
             Graphics context = screen.image.getGraphics().create();
             Graphics2D g2 = (Graphics2D) context;
 
-            float alpha = 0.5f;
-            int type = AlphaComposite.SRC_OVER;
-
             g2.setFont(new Font("Serif", Font.BOLD, 15));
             //width - metrics.stringWidth(text)) / 2
 
@@ -112,7 +110,7 @@ public class Tile implements Serializable {
             g2.drawString(currentTile.getType().toString(), (int) currentTile.getPoint().getX(), (int) currentTile.getPoint().getY() + 14);
             //System.out.println("painted static tile.");
 
-            g2.setComposite(AlphaComposite.getInstance(type, alpha));
+            g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.5f));
             //g2.setColor(Application.getColour(currentTile.getType())); /* Draw the static tile */
             g2.setColor(Utils.hexToColor(Application.getColour((currentTile.getType()))));
             g2.fillRect((int) currentTile.getPoint().getX(), (int) currentTile.getPoint().getY(), Constants.TILE_SIZE, Constants.TILE_SIZE);
@@ -121,11 +119,11 @@ public class Tile implements Serializable {
         }
 
         if (currentTile == null /*&& lastTile == null*/ ) { /* first run */
-            currentTile = snapToTile(mouseLoc);
+            currentTile = Application.snapToTile(mouseLoc);
             //lastTile = getTile(new Point((int) currentTile.getPoint().getX() + 32, (int) currentTile.getPoint().getY() + 32));
         }
 
-        currentTile = snapToTile(mouseLoc);
+        currentTile = Application.snapToTile(mouseLoc);
 
         /* TODO: fix */
         //if (currentTile.getID().equals(lastTile.getID())) {
@@ -148,93 +146,14 @@ public class Tile implements Serializable {
         g2.setComposite(AlphaComposite.getInstance(type, alpha));
         //g2.setColor(colours[rand.nextInt(colours.length-1)]);
         g2.setColor(Utils.hexToColor(Application.getPreferences().getHighlightColour())); /* Highlight Colour */
+        if (currentTile == null)
+        	return;
         g2.fillRect((int) currentTile.getPoint().getX() /*- Constants.OFFSET_X*/ , (int) currentTile.getPoint().getY() /*- Constants.OFFSET_Y*/ , Constants.TILE_SIZE, Constants.TILE_SIZE);
 
         //System.out.println(currentTile.getType());
         //System.out.println(Application.getStaticTiles().values());
     }
-
-    /**
-     * - create a Tile object to represent every tile on the map
-     * - each tile gets assigned a unique ID (UUID.randomUUID()) to it
-     * - when checking to see if the client has switched tiles (do not re-render), check to see if the UUID of the current hovered tile is the same/different.
-     */
-
-    //	snapToTile/getTile
-    public Tile snapToTile(Point p) {
-        double newX, newY;
-    	
-    	if (Utils.isOutOfBounds(p)) {
-    		return new Tile(new Point(0,0));
-    	}
-
-        newX = p.getX() - (p.getX() % Constants.TILE_SIZE) /*+ Constants.OFFSET_X*/ ;
-        newY = p.getY() - (p.getY() % Constants.TILE_SIZE) /*+ Constants.OFFSET_Y*/ ;
-
-        Tile t = getTile(new Point((int) newX, (int) newY));
-
-        return t;
-    }
     
-    public void mapValues() {
-    	tileMap = new Tile[19][19];
-    	for (int count=0; count<361; count++) {
-    		for (int x=0; x<19; x++) {
-    			for (int y=0; y<19; y++) {
-    				tileMap[x][y] = new Tile(new Point(x*32, y*32));
-    				//tileMap[x][y] = new Tile(UUID.randomUUID(), new Point(x*32, y*32), TileType.OPEN, Color.WHITE, -1, -1);
-    			}
-    		}
-    	}
-        /*tileMap = new ArrayList < Tile > (361); /* 361 tile total */
-        /*for (int i = 0; i < 1024; i += 32) { //19x19 grid (28 * 28 = 784)
-            for (int j = 0; j < 1024; j += 32) { //19x19 grid (28 * 28 = 784)
-            	//    public Tile(UUID ID, Point pt, TileType type, Color colour, int gCost, int hCost) {
-                tileMap.add(new Tile(UUID.randomUUID(), new Point(i, j), TileType.OPEN, Color.WHITE, -1, -1));
-                //each tile has a unique identifier (UUID)
-            }
-        }*/
-    }
-
-    public Tile getTile(Point p) {
-    	Tile t = null;
-    	for (int x=0; x<tileMap.length; x++) {
-    		for (int y=0; y<tileMap.length; y++) {
-    			if (tileMap[x][y].getPoint().equals(p)) {
-    				t = tileMap[x][y];
-    			}
-    		}
-    	}
-    	
-        /*Tile t = null;
-        for (int i = 0; i < tileMap.size(); i++) {
-            if (tileMap.get(i).getPoint().equals(p)) {
-                t = tileMap.get(i);
-            }
-        }*/
-    	
-        //if (t == null) {
-        //System.out.println("unable to find Tile for given point :c");
-        //}// else {
-        //	System.out.println("tile: "+t);
-        //}
-
-        return t;
-    }
-
-    public Tile[][] getTileMap() {
-    	if (tileMap.length == 0) {
-    		//System.out.println("tileMap length == 0: mapping values before returning!");
-    		SimpleLogger.log(Tile.class, MessageType.INFO, "tileMap length = 0", "mapping values before returning!");
-    		mapValues();
-    	}
-        return tileMap;
-    }
-
-    public void setTileMap(Tile[][] tileMap) {
-    	this.tileMap = tileMap;
-    }
-
     public TileType getType() {
         return type;
     }

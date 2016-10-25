@@ -5,7 +5,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -17,6 +19,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferStrategy;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,6 +29,7 @@ import java.util.Random;
 import java.util.logging.Logger;
 
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -49,11 +53,28 @@ import uk.ac.reigate.rm13030.visual.Grid;
 import uk.ac.reigate.rm13030.visual.MainScreen;
 
 import java.awt.Insets;
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
 import javax.swing.JRadioButton;
 import javax.swing.UIManager;
 import javax.swing.JProgressBar;
 import javax.swing.JCheckBox;
+import javax.swing.GroupLayout;
+import javax.swing.GroupLayout.Alignment;
+import java.awt.GridLayout;
+import javax.swing.BoxLayout;
+import com.jgoodies.forms.layout.FormLayout;
+import com.jgoodies.forms.layout.ColumnSpec;
+import com.jgoodies.forms.layout.RowSpec;
+import net.miginfocom.swing.MigLayout;
+import java.awt.GridBagLayout;
+import java.awt.CardLayout;
+import java.awt.FlowLayout;
+import javax.swing.JTextPane;
+import javax.swing.JInternalFrame;
+import javax.swing.JToolBar;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
 
 public class Application extends Canvas implements Runnable, MouseListener, MouseMotionListener, KeyListener {
 
@@ -63,11 +84,12 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
     private boolean running;
     
     private static LocalStorage localStorage;
+    public static Connection DB_Connection;
     
     private boolean renderDebug;
     private int lastFps = -1;
     
-    private static String status;
+    private static JLabel status;
 
     private static Application instance;
     private MainScreen screen;
@@ -76,8 +98,11 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
     private static Preferences preferences;
     private static Tile mousePressed, mouseReleased;
     private static boolean isDragging;
-    private static Tile tile_instance;
-    private static BidiMap<Tile, Tile.TileType> staticTiles;
+    
+    private static Tile[][] tileMap;
+    
+    private static ArrayList<Tile> staticTiles;
+    //private static BidiMap<Tile, Tile.TileType> staticTiles;
 
     /**
      * Static tiles are non-highlight tiles that are permanently rendered onto the grid (e.g. as Start/End Tiles, or Obstruction Tiles)
@@ -95,12 +120,11 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
      */
     public static void main(String... args) {
     	
-    	SimpleLogger.log(Application.class, MessageType.INFO, "User: "+Paths.get(System.getProperty("user.home")).getFileName(), args);
+    	SimpleLogger.log(Application.class, MessageType.INFO, "User: "+Paths.get(System.getProperty("user.home")).getFileName());
     	
         grid = new Grid();
         
-        tile_instance = new Tile(new Point(-1,-1));
-        tile_instance.mapValues();
+        mapValues();
         
         localStorage = new LocalStorage();
         preferences = retrievePreferences();
@@ -120,21 +144,26 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
         	}
         }
        
-        status = "Please place the START tile.";
+        status = new JLabel("Please place the START tile.");
+
+        frame = new JFrame(Constants.NAME);
+        addMenuBar();
+        
+        JPanel gridPanel = new JPanel();
+        gridPanel.setBorder(new TitledBorder(null, "v"+Constants.VERSION, TitledBorder.LEADING, TitledBorder.TOP, null, null));
+        frame.getContentPane().add(gridPanel, BorderLayout.NORTH);
         
         //AStarAlgorithm ASA = new AStarAlgorithm(tile_instance.getTileMap(), 500, true);
 
         instance = new Application();
         instance.setSize(new Dimension(Constants.WIDTH, Constants.HEIGHT));
-
-        frame = new JFrame(Constants.NAME);
-        addMenuBar();
-        frame.getContentPane().add(instance, BorderLayout.CENTER);
+        gridPanel.add(instance);
+        	
         frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setResizable(true);
-        frame.setMinimumSize(new Dimension(frame.getWidth(), 448 + 62)); //grid bounds = 608x448, +62 = frame height offset (menubar, title)
+        frame.setMinimumSize(new Dimension(frame.getWidth(), frame.getHeight())); //grid bounds = 608x448, +62 = frame height offset (menubar, title)
         frame.setVisible(true);
         
         instance.start();
@@ -184,7 +213,7 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
         		
         		localStorage.storePreferences(preferences);
         		localStorage.storeStaticTiles(staticTiles);
-        		localStorage.storeTileMap(tile_instance.getTileMap());
+        		localStorage.storeTileMap(getTileMap());
         	}
         });
         saveMenuItem.setMnemonic(KeyEvent.VK_S);
@@ -232,7 +261,7 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
     }
     
     private static void loadSaveFile() {
-    	tile_instance.setTileMap(localStorage.readTileMap());
+    	tileMap = localStorage.readTileMap();
 		staticTiles = localStorage.readStaticTiles();
 		preferences = localStorage.readPrefences();
 		
@@ -245,7 +274,7 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
         addMouseMotionListener(this);
         addKeyListener(this);
 
-        staticTiles = new DualHashBidiMap<Tile, Tile.TileType>();
+        staticTiles = new ArrayList<Tile>();
 
         screen = new MainScreen(Constants.WIDTH, Constants.HEIGHT);
     }
@@ -294,7 +323,7 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
         }
     }
 
-    private void render() {
+    private synchronized void render() {
         BufferStrategy bs = this.getBufferStrategy();
         if (bs == null) {
             createBufferStrategy(3);
@@ -312,15 +341,27 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
         Point currentMouseLoc = this.getMousePosition();
 
         /* Tile Highlighting */
-        tile_instance.render(screen, currentMouseLoc, false); //false since the tile we're painting is NOT static : (we're painting the highlight tile)
+        Tile.render(screen, currentMouseLoc, false); //false since the tile we're painting is NOT static : (we're painting the highlight tile)
         //System.out.println("Tile type: "+tile_instance.getTile(tile_instance.snapToTile(currentMouseLoc).getPoint()).getType());
         /* End of Tile Highlighting */
 
+        /***
+         * TODO: Render queue system, otherwise: (ConcurrentModificationException)'s are thrown
+         */
+        
         /* Static Tiles */
-        for (MapIterator<Tile, TileType> it = staticTiles.mapIterator(); it.hasNext();) {
+        for (Tile t : staticTiles) {
+        	if (canPlace(snapToTile(currentMouseLoc))) {
+        		Tile.render(screen, t.getPoint(), true);
+        	} else {
+        		return;
+        	}
+        }
+        
+        /**for (MapIterator<Tile, TileType> it = staticTiles.mapIterator(); it.hasNext();) {
             Tile obj = it.next();
-            if (canPlace(tile_instance.snapToTile(currentMouseLoc))) {
-            	tile_instance.render(screen, obj.getPoint(), true);
+            if (canPlace(snapToTile(currentMouseLoc))) {
+            	Tile.render(screen, obj.getPoint(), true);
                 //Tile.render(screen, obj.getPoint(), true);
                 //remove the current element from the iterator and the list.        
                 //it.remove();
@@ -328,7 +369,10 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
                 return;
                 //System.out.println("you cannot place a tile here!");
             }
-        }
+        } **/
+        
+        //	BidiMap<Tile, Tile.TileType>
+        
         /* End of Static Tiles */
 
         /* Information Box */
@@ -357,7 +401,7 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
         //System.out.println("isDragging="+isDragging);
         if (isDragging == true) {
             Point p1 = mousePressed.getPoint();//Tile.snapToTile(mousePressed.getPoint()).getPoint();
-            Point p2 = (Boolean) preferences.getDraggingMap().get("Snap to Tile") == true ? tile_instance.snapToTile(currentMouseLoc).getPoint() : currentMouseLoc;//Tile.snapToTile(currentMouseLoc).getPoint(); //current mouse loc
+            Point p2 = (Boolean) preferences.getDraggingMap().get("Snap to Tile") == true ? snapToTile(currentMouseLoc).getPoint() : currentMouseLoc;//Tile.snapToTile(currentMouseLoc).getPoint(); //current mouse loc
             
             g.setColor(Color.red);
             if (!Utils.isOutOfBounds(p2)) {
@@ -365,8 +409,10 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
             }
         }
         
-        g.setColor(Utils.hexToColor("#00ff00"));
-        g.drawString("Status: "+getStatus(), 75, 500);
+        renderTutorial(g);
+        
+        //g.setColor(Utils.hexToColor("#00ff00"));
+        //g.drawString("Status: "+getStatus().getText(), 75, 500);
 
         
         if (renderDebug) {
@@ -385,10 +431,61 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
         g.dispose();
         bs.show();
     }
+    
+    private void renderTutorial(Graphics g) {
+    	Rectangle box = Constants.TUTORIAL_RECT;
+    	
+        Graphics2D g2 = (Graphics2D) g;
+    	g2.setColor(Utils.hexToColor("#909090"));
+        g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, mouseInTutorialBox() ? 0.5f : 0.75f));
+        
+        g2.fillRect((int) box.getX(), (int) box.getY(), (int) box.getWidth(), (int) box.getHeight());
+    }
+    
+    private boolean mouseInTutorialBox() {
+    	Point mouseLoc = this.getMousePosition();
+    	
+    	if (mouseLoc == null) {
+    		return false;
+    	}
+    	
+    	if (Constants.TUTORIAL_RECT.contains(mouseLoc)) {
+    		return true;
+    	} else {
+    		return false;
+    	}
+        /*if ((mouseLoc.getX() < 595 && mouseLoc.getX() > 462) && (mouseLoc.getY() < 110 && mouseLoc.getY() > 10)) {
+        	return true;
+        } else {
+        	return false;
+        }*/
+    }
+    
+    /**
+     * - create a Tile object to represent every tile on the map
+     * - each tile gets assigned a unique ID (UUID.randomUUID()) to it
+     * - when checking to see if the client has switched tiles (do not re-render), check to see if the UUID of the current hovered tile is the same/different.
+     */
+
+    //	snapToTile/getTile
+    public static Tile snapToTile(Point p) {
+        double newX, newY;
+    	
+    	if (Utils.isOutOfBounds(p)) {
+    		return new Tile(new Point(0,0));
+    	}
+
+        newX = p.getX() - (p.getX() % Constants.TILE_SIZE) /*+ Constants.OFFSET_X*/ ;
+        newY = p.getY() - (p.getY() % Constants.TILE_SIZE) /*+ Constants.OFFSET_Y*/ ;
+
+        Tile t = getTile(new Point((int) newX, (int) newY));
+
+        return t;
+    }
 
     private boolean canPlace(Tile tile) {
 
-        if (isDragging) {
+        if (isDragging || tile == null) {
             return true;
         }
 
@@ -396,14 +493,14 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
         if (tile.getType().equals(TileType.OPEN)) {
             //can place start tile
             return true;
-        } else if (tile.getType().equals(TileType.START) && staticTiles.containsKey(tile)) {
+        } else if (tile.getType().equals(TileType.START) && staticTiles.contains(tile)) {
             //start tile already placed.
             return false;
-        } else if (tile.getType().equals(TileType.END) && staticTiles.containsKey(tile)) {
+        } else if (tile.getType().equals(TileType.END) && staticTiles.contains(tile)) {
             //end tile already placed.
             return false;
         } else if (tile.getType().equals(TileType.OBSTRUCTION)) {
-            return true;
+            return false;
         }
         return true;
     }
@@ -436,15 +533,11 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
     private TileType findType() {
     	if (staticTiles.size() == 0) {
     		return TileType.START;
-    	}
-    	
-    	if (staticTiles.containsValue(TileType.START) && !staticTiles.containsValue(TileType.END)) {
+    	} else if (staticTiles.size() == 1) {
     		return TileType.END;
-    	} else if (staticTiles.containsValue(TileType.END)) {
-    		return TileType.OBSTRUCTION;
     	} else {
     		return TileType.OBSTRUCTION;
-    	}
+    	} 
     }
 
     /**
@@ -454,18 +547,15 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
      * -> set the co-ordinates (Point) of this tile to its new coordinates
      */
 
-    private void handleDrag(MouseEvent drag) {
-    	
-    }
-
     private void handleClick(MouseEvent click) {
-        Tile t = tile_instance.snapToTile(click.getPoint());
+        Tile t = snapToTile(click.getPoint());
 
         if (canPlace(t)) {
             t.setType(findType());
             //t.setColour(getColour(t.getType()));
-            staticTiles.put(t, findType());
-            setStatus(findType() == TileType.OBSTRUCTION ? "Ready to path-find." : "Please place the "+findType()+" tile.");
+            //staticTiles.put(t, t.getTileType());
+            staticTiles.add(t);								//findType()
+            setStatus(new JLabel(t.getTileType() == TileType.OBSTRUCTION ? "Ready to path-find." : "Please place the <p color=\"#FF0000\">"+findType()+"</p> tile."));
         } else {
             return;
         }
@@ -477,7 +567,8 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
     public void mouseDragged(MouseEvent arg0) {
         // TODO Auto-generated method stub
 
-        handleDrag(arg0);
+        //handleDrag(arg0);
+        System.out.println("mouse dragged");
     }
 
     @Override
@@ -489,6 +580,7 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
     public void mouseClicked(MouseEvent arg0) {
         // TODO Auto-generated method stub
         handleClick(arg0);
+        System.out.println("mouse clicked");
     }
 
     @Override
@@ -503,7 +595,9 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
 
     @Override
     public void mousePressed(MouseEvent arg0) {
-    	mousePressed = tile_instance.snapToTile(arg0.getPoint());
+    	mousePressed = snapToTile(arg0.getPoint());
+    	
+        System.out.println("mouse pressed");
         
         if (mousePressed.getType() != TileType.OPEN) {
             isDragging = true;
@@ -512,9 +606,18 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
 
     @Override
     public void mouseReleased(MouseEvent arg0) {
-        mouseReleased = tile_instance.snapToTile(arg0.getPoint());
-
+        mouseReleased = snapToTile(arg0.getPoint());
+        System.out.println("mouse released");
         isDragging = false;
+        
+        if (canPlace(mouseReleased)) {
+        	mouseReleased.setType(mousePressed.getTileType());
+        	mousePressed.setType(TileType.OPEN);
+        	mousePressed.setPoint(mouseReleased.getPoint());
+        } else {
+        	System.out.println("can't drag tile here @@");
+        }
+        //    private static BidiMap<Tile, Tile.TileType> staticTiles;
     }
 
     @Override
@@ -544,24 +647,65 @@ public class Application extends Canvas implements Runnable, MouseListener, Mous
 		Application.preferences = preferences;
 	}
 
-	public static BidiMap<Tile, Tile.TileType> getStaticTiles() {
+	public static ArrayList<Tile> getStaticTiles() {
         return staticTiles;
     }
 	
-    public String getStatus() {
+    public JLabel getStatus() {
 		return status;
 	}
+    
+    public void setStatus(JLabel status) {
+		this.status = status;
+	}
 
-	public void setStatus(String status) {
-		Application.status = status;
+	public static Tile[][] getTileMap() {
+    	if (tileMap.length == 0) {
+    		//System.out.println("tileMap length == 0: mapping values before returning!");
+    		SimpleLogger.log(Tile.class, MessageType.INFO, "tileMap length = 0", "mapping values before returning!");
+    		mapValues();
+    	}
+        return tileMap;
+    }
+    
+    public static Tile getTile(Point p) {
+    	Tile t = null;
+    	for (int x=0; x<tileMap.length; x++) {
+    		for (int y=0; y<tileMap.length; y++) {
+    			if (tileMap[x][y].getPoint().equals(p)) {
+    				t = tileMap[x][y];
+    			}
+    		}
+    	}
+        return t;
+    }
+    
+    public void setTileMap(Tile[][] tileMap) {
+		this.tileMap = tileMap;
 	}
-	
-    public static Tile getTileInstance() {
-		return tile_instance;
-	}
+
+	public static void mapValues() {
+    	tileMap = new Tile[19][19];
+    	for (int count=0; count<361; count++) {
+    		for (int x=0; x<19; x++) {
+    			for (int y=0; y<19; y++) {
+    				tileMap[x][y] = new Tile(new Point(x*32, y*32));
+    				//tileMap[x][y] = new Tile(UUID.randomUUID(), new Point(x*32, y*32), TileType.OPEN, Color.WHITE, -1, -1);
+    			}
+    		}
+    	}
+        /*tileMap = new ArrayList < Tile > (361); /* 361 tile total */
+        /*for (int i = 0; i < 1024; i += 32) { //19x19 grid (28 * 28 = 784)
+            for (int j = 0; j < 1024; j += 32) { //19x19 grid (28 * 28 = 784)
+            	//    public Tile(UUID ID, Point pt, TileType type, Color colour, int gCost, int hCost) {
+                tileMap.add(new Tile(UUID.randomUUID(), new Point(i, j), TileType.OPEN, Color.WHITE, -1, -1));
+                //each tile has a unique identifier (UUID)
+            }
+        }*/
+    }
 
 	private void tick() {
 
     }
-
+	
 }
